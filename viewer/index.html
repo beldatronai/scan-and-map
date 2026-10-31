@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ScanMap viewer</title>
+  <link rel="stylesheet" href="./src/style.css" />
+</head>
+<body>
+  <canvas id="view"></canvas>
+  <aside id="panel">
+    <header>
+      <h1>ScanMap</h1>
+      <select id="session" aria-label="Session"></select>
+    </header>
+    <section id="status" class="muted">Loading…</section>
+    <section>
+      <label for="layer">Transmitter</label>
+      <input id="layerFilter" type="search" placeholder="Filter by name or address" />
+      <select id="layer" size="7"></select>
+    </section>
+    <section class="grid2">
+      <label><input type="checkbox" id="showSlice" checked /> Heatmap slice</label>
+      <label><input type="checkbox" id="showSamples" checked /> Sample dots</label>
+      <label><input type="checkbox" id="showPoints" checked /> AR point cloud</label>
+      <label><input type="checkbox" id="showSplat" checked /> Photoreal splat</label>
+      <label><input type="checkbox" id="showMesh" /> Mesh</label>
+      <label><input type="checkbox" id="showPath" checked /> Walk path</label>
+    </section>
+    <section>
+      <label for="height">Slice height <span id="heightVal"></span></label>
+      <input id="height" type="range" min="0" max="1" step="0.01" value="0.5" />
+      <label for="opacity">Heatmap opacity</label>
+      <input id="opacity" type="range" min="0.1" max="1" step="0.05" value="0.75" />
+    </section>
+    <section class="legend">
+      <div class="bar"></div>
+      <div class="ticks"><span>-90</span><span>-75</span><span>-60</span><span>-45</span><span>-30 dBm</span></div>
+    </section>
+    <section id="info" class="muted"></section>
+    <section class="actions">
+      <button id="process" type="button">Re-run processing</button>
+      <button id="processAr" type="button" title="Use AR poses directly; use when COLMAP fails on bare walls">Re-run with AR poses</button>
+    </section>
+    <p class="muted small">Drag to orbit, right-drag to pan, W A S D to walk, Q/E down/up.</p>
+  </aside>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

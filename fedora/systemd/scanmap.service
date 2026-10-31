@@ -1,0 +1,15 @@
+# User service: cp to ~/.config/systemd/user/ then
+#   systemctl --user daemon-reload && systemctl --user enable --now scanmap
+#   loginctl enable-linger $USER     # keep it running when you are logged out
+[Unit]
+Description=ScanMap receiver and viewer
+After=network-online.target
+
+[Service]
+WorkingDirectory=%h/scan-and-map/fedora
+ExecStart=%h/scan-and-map/fedora/.venv/bin/scanmap serve --port 8765
+Restart=on-failure
+Environment=SCANMAP_DATA=%h/scanmap/sessions
+
+[Install]
+WantedBy=default.target
