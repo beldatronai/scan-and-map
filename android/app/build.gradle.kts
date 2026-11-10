@@ -9,9 +9,9 @@ android {
 
     defaultConfig {
         applicationId = "dev.scanmap.capture"
-        // Tuned for Pixel 10 (Android 16); 33 keeps the permission model simple
-        // (NEARBY_WIFI_DEVICES, BLUETOOTH_SCAN) while still running on recent Pixels.
-        minSdk = 33
+        // Tuned for Pixel 10 (Android 16), but runs down to Android 10 so older ARCore phones
+        // such as the Galaxy A6 (2018) work too. Newer APIs are guarded with SDK_INT checks.
+        minSdk = 29
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
@@ -27,6 +27,11 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+    }
+    lint {
+        // Fail the build on calls to APIs newer than minSdk without a version check.
+        checkOnly += "NewApi"
+        abortOnError = true
     }
     buildFeatures {
         viewBinding = true

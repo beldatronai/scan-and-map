@@ -16,7 +16,7 @@ Kotlin + ARCore, no third-party SDKs. Tuned for Pixel 10 (Android 16, arm64).
 | `SessionExport.kt` | Zips (JPEGs stored, CSVs deflated) and streams the upload to Fedora |
 | `BackgroundRenderer.kt`, `SampleDotsRenderer.kt` | Camera background and the live coverage dots |
 
-Build: `./gradlew assembleDebug` (JDK 17, Android SDK 36). CI builds the APK on every push.
+Build: `./gradlew assembleDebug` (JDK 17, Android SDK 36); step by step on Fedora in [BUILD-FEDORA.md](BUILD-FEDORA.md). CI builds the APK on every push. minSdk 29 (Android 10).
 
 Sessions are stored in `Android/data/dev.scanmap.capture/files/sessions/` and can also be pulled with
 `adb pull /sdcard/Android/data/dev.scanmap.capture/files/sessions/`.

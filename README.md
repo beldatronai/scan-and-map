@@ -75,7 +75,16 @@ cd fedora
 * Wi-Fi 6E/7 radio: 6 GHz access points show up in scans; the app logs channel width (up to 320 MHz)
   and Wi-Fi standard per reading.
 * BLE 5 extended advertising is scanned on all PHYs, so newer beacons and trackers are included.
-* arm64-v8a only, minSdk 33, targetSdk 36 (Android 16).
+* arm64-v8a only, targetSdk 36 (Android 16).
+
+## Other phones
+
+minSdk is 29 (Android 10), so any arm64 phone on [Google's ARCore device list](https://developers.google.com/ar/devices)
+running Android 10 or newer should work, for example the Samsung Galaxy A6 (2018). Expect lower
+quality there: older phones usually give ARCore only a 640x480 CPU image (fewer usable keyframes for
+photogrammetry), Android 10 cannot switch off Wi-Fi scan throttling programmatically or report its
+state (turn it off in Developer options if the menu has it), and Wi-Fi standard is not logged below
+Android 11. CI runs Android lint's NewApi check so newer calls stay behind version checks.
 
 ## Roadmap
 

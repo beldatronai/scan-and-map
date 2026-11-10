@@ -11,6 +11,9 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- No neverForLocation flag: we want BSSIDs and BLE beacons, which the flag would hide. -->
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
+    <!-- Android 10-11 (e.g. Galaxy A6): legacy Bluetooth permissions; scanning uses ACCESS_FINE_LOCATION. -->
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 

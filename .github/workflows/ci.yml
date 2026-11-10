@@ -19,8 +19,8 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
-      - name: Assemble debug APK
-        run: ./gradlew --no-daemon assembleDebug
+      - name: Assemble debug APK and check API levels
+        run: ./gradlew --no-daemon assembleDebug lintDebug
       - uses: actions/upload-artifact@v4
         with:
           name: scanmap-debug-apk
