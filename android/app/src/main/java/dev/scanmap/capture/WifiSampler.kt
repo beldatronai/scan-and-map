@@ -11,6 +11,8 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.net.wifi.WifiInfo
 import android.net.wifi.WifiManager
+import android.net.wifi.ScanResult
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
@@ -38,16 +40,23 @@ class WifiSampler(
     var scansRequested = 0; private set
     var scansThrottled = 0; private set
     var scansReceived = 0; private set
-    val throttlingEnabled: Boolean get() = wifi.isScanThrottleEnabled
+    /** Null on Android 10, which cannot report it (throttling is on by default there). */
+    val throttlingEnabled: Boolean? get() =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) wifi.isScanThrottleEnabled else null
 
-    private val netCallback = object : ConnectivityManager.NetworkCallback(ConnectivityManager.NetworkCallback.FLAG_INCLUDE_LOCATION_INFO) {
-        override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) {
-            val info = caps.transportInfo as? WifiInfo ?: return
-            lastInfo = info
-            emitConnected(info)
-        }
-        override fun onLost(network: Network) { lastInfo = null }
-    }
+    // Android 12+ hands us the WifiInfo (with BSSID) in the callback; older versions only get
+    // the poll below, which is enough.
+    private val netCallback: ConnectivityManager.NetworkCallback? =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            object : ConnectivityManager.NetworkCallback(ConnectivityManager.NetworkCallback.FLAG_INCLUDE_LOCATION_INFO) {
+                override fun onCapabilitiesChanged(network: Network, caps: NetworkCapabilities) {
+                    val info = caps.transportInfo as? WifiInfo ?: return
+                    lastInfo = info
+                    emitConnected(info)
+                }
+                override fun onLost(network: Network) { lastInfo = null }
+            }
+        } else null
 
     private val scanReceiver = object : BroadcastReceiver() {
         @SuppressLint("MissingPermission")
@@ -61,11 +70,11 @@ class WifiSampler(
                         tNs = r.timestamp * 1000L,
                         kind = SampleKind.WIFI_SCAN,
                         id = r.BSSID ?: "",
-                        name = r.wifiSsid?.toString()?.trim('"') ?: "",
+                        name = ssidOf(r),
                         freqMhz = r.frequency,
                         rssiDbm = r.level,
                         channelWidthMhz = channelWidthMhz(r.channelWidth),
-                        wifiStandard = r.wifiStandard,
+                        wifiStandard = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) r.wifiStandard else 0,
                     )
                 )
             }
@@ -98,7 +107,7 @@ class WifiSampler(
                 name = (info.ssid ?: lastInfo?.ssid ?: "").trim('"'),
                 freqMhz = info.frequency,
                 rssiDbm = rssi,
-                wifiStandard = info.wifiStandard,
+                wifiStandard = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) info.wifiStandard else 0,
             )
         )
     }
@@ -118,13 +127,15 @@ class WifiSampler(
         if (running) return
         running = true
         context.registerReceiver(scanReceiver, IntentFilter(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION))
-        try {
-            cm.registerNetworkCallback(
-                NetworkRequest.Builder().addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build(),
-                netCallback,
-            )
-        } catch (e: SecurityException) {
-            Log.w(TAG, "network callback", e)
+        netCallback?.let { cb ->
+            try {
+                cm.registerNetworkCallback(
+                    NetworkRequest.Builder().addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build(),
+                    cb,
+                )
+            } catch (e: SecurityException) {
+                Log.w(TAG, "network callback", e)
+            }
         }
         handler.post(pollConnected)
         requestScan()
@@ -135,11 +146,17 @@ class WifiSampler(
         running = false
         handler.removeCallbacksAndMessages(null)
         runCatching { context.unregisterReceiver(scanReceiver) }
-        runCatching { cm.unregisterNetworkCallback(netCallback) }
+        netCallback?.let { cb -> runCatching { cm.unregisterNetworkCallback(cb) } }
     }
 
     companion object {
         private const val TAG = "WifiSampler"
+
+        @Suppress("DEPRECATION")
+        fun ssidOf(r: ScanResult): String =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) r.wifiSsid?.toString()?.trim('"') ?: ""
+            else r.SSID ?: ""
+
         fun channelWidthMhz(w: Int): Int = when (w) {
             0 -> 20; 1 -> 40; 2 -> 80; 3 -> 160; 4 -> 160 /* 80+80 */; 5 -> 320
             else -> 0

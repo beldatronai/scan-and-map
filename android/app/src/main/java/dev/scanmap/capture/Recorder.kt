@@ -123,7 +123,7 @@ class Recorder(private val context: Context, private val dots: SampleDotsRendere
             sb.append("  points ").append(cloud?.size ?: 0)
             wifi?.let {
                 sb.append("\nscans ").append(it.scansReceived).append('/').append(it.scansRequested)
-                if (it.throttlingEnabled) sb.append("  ⚠ scan throttling ON (Developer options)")
+                if (it.throttlingEnabled != false) sb.append("  ⚠ turn off Wi-Fi scan throttling (Developer options)")
             }
             grabber?.let { if (it.rejectedBlurry > 0) sb.append("\nblurry skipped ").append(it.rejectedBlurry) }
         }
@@ -149,6 +149,7 @@ class Recorder(private val context: Context, private val dots: SampleDotsRendere
                 put("dropped_samples", droppedSamples); put("wifi_ids", wifiIds.size); put("ble_ids", bleIds.size)
             })
             put("wifi_scan_throttling", wifi?.throttlingEnabled ?: JSONObject.NULL)
+            put("android_release", android.os.Build.VERSION.RELEASE)
             put("files", JSONArray(listOf("poses.csv", "frames.csv", "frames/", "samples.csv", "depth_points.ply")))
             extraMeta()
         }

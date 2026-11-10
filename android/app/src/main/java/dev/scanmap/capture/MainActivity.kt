@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.opengl.GLES20
 import android.opengl.GLSurfaceView
 import android.opengl.Matrix
+import android.os.Build
 import android.os.Bundle
 import android.text.InputType
 import android.util.Log
@@ -53,13 +54,15 @@ class MainActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     private val sessionsRoot by lazy { File(getExternalFilesDir(null), "sessions").apply { mkdirs() } }
     private val prefs by lazy { getSharedPreferences("scanmap", MODE_PRIVATE) }
 
-    private val permissions = arrayOf(
-        Manifest.permission.CAMERA,
-        Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.NEARBY_WIFI_DEVICES,
-        Manifest.permission.BLUETOOTH_SCAN,
-        Manifest.permission.BLUETOOTH_CONNECT,
-    )
+    private val permissions = buildList {
+        add(Manifest.permission.CAMERA)
+        add(Manifest.permission.ACCESS_FINE_LOCATION)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            add(Manifest.permission.BLUETOOTH_SCAN)
+            add(Manifest.permission.BLUETOOTH_CONNECT)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) add(Manifest.permission.NEARBY_WIFI_DEVICES)
+    }.toTypedArray()
     private val permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { res ->
         if (res.values.any { !it }) toast("Camera, location, nearby Wi-Fi and Bluetooth permissions are all needed")
     }
