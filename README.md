@@ -77,6 +77,34 @@ cd fedora
 * BLE 5 extended advertising is scanned on all PHYs, so newer beacons and trackers are included.
 * arm64-v8a only, targetSdk 36 (Android 16).
 
+## Privacy and offline use (GrapheneOS)
+
+Nothing in ScanMap talks to a cloud service. The app uses ARCore only for on-device motion tracking
+(no Cloud Anchors, Geospatial or Scene Semantics), and its only network call is the optional
+"Send to Fedora" upload to your own receiver on the LAN.
+
+CI builds two APKs:
+
+| APK | Network | Getting sessions off the phone |
+|---|---|---|
+| `app-lan-debug.apk` (ScanMap) | INTERNET permission, used only for "Send to Fedora" | upload, Share zip, or `adb pull` |
+| `app-offline-debug.apk` (ScanMap offline) | **no INTERNET permission** (CI fails if one sneaks in) | Share zip or `adb pull` over USB |
+
+On GrapheneOS:
+
+1. Install sandboxed Google Play from the GrapheneOS App Store, then **Google Play Services for AR**
+   (ARCore) from the Play Store. ARCore is a separate app; ScanMap's own permissions do not limit it.
+2. Open ScanMap once with the network on, so ARCore can finish setting itself up and fetch any
+   device data it needs.
+3. Then take network access away: Settings → Apps → *Google Play Services for AR* → Permissions →
+   **Network** off (do the same for ScanMap if you use the `lan` APK, or use the `offline` APK).
+   Optionally turn Network off for Google Play services and the Play Store too.
+4. Record as usual. Camera frames, poses and radio readings are processed and stored on the phone.
+
+If tracking stops working after step 3, re-enable Network for ARCore once, let it update, and turn
+it off again. ARCore updates through the Play Store, so leaving its network off also freezes its
+version.
+
 ## Other phones
 
 minSdk is 29 (Android 10), so any arm64 phone on [Google's ARCore device list](https://developers.google.com/ar/devices)
