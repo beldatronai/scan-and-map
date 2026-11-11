@@ -18,6 +18,25 @@ android {
         ndk { abiFilters += listOf("arm64-v8a") }
     }
 
+    // Two variants of the same app:
+    //  lan      - can upload a session to the Fedora receiver over HTTP on the home network.
+    //  offline  - no INTERNET permission at all, so the OS guarantees nothing leaves the phone;
+    //             sessions leave only via "Share zip" or `adb pull`. Installs side by side.
+    flavorDimensions += "network"
+    productFlavors {
+        create("lan") {
+            dimension = "network"
+            buildConfigField("boolean", "ALLOW_UPLOAD", "true")
+        }
+        create("offline") {
+            dimension = "network"
+            applicationIdSuffix = ".offline"
+            versionNameSuffix = "-offline"
+            buildConfigField("boolean", "ALLOW_UPLOAD", "false")
+            resValue("string", "app_name", "ScanMap offline")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false

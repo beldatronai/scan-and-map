@@ -82,9 +82,14 @@ class MainActivity : AppCompatActivity(), GLSurfaceView.Renderer {
 
         ui.record.setOnClickListener { if (recorder.recording) stopRecording() else startRecording() }
         ui.share.setOnClickListener { lastSession?.let(::shareZip) }
-        ui.upload.setOnClickListener { lastSession?.let(::uploadToFedora) }
-        ui.upload.setOnLongClickListener { askServer(); true }
-        ui.status.setOnLongClickListener { askServer(); true }
+        if (BuildConfig.ALLOW_UPLOAD) {
+            ui.upload.setOnClickListener { lastSession?.let(::uploadToFedora) }
+            ui.upload.setOnLongClickListener { askServer(); true }
+            ui.status.setOnLongClickListener { askServer(); true }
+        } else {
+            // Offline build: no INTERNET permission, sessions leave only via Share zip or adb pull.
+            ui.upload.visibility = android.view.View.GONE
+        }
 
         lastSession = sessionsRoot.listFiles()?.filter { File(it, "meta.json").exists() }?.maxByOrNull { it.name }
         updateButtons()
@@ -183,7 +188,7 @@ class MainActivity : AppCompatActivity(), GLSurfaceView.Renderer {
     private fun updateButtons() {
         val ready = lastSession != null && !recorder.recording
         ui.share.isEnabled = ready
-        ui.upload.isEnabled = ready
+        ui.upload.isEnabled = ready && BuildConfig.ALLOW_UPLOAD
     }
 
     private fun exportsDir() = File(cacheDir, "exports")

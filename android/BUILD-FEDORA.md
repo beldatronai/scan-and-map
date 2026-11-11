@@ -16,11 +16,12 @@ sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0"
 
 # 3. Build
 cd ~/scan-and-map/android
-./gradlew assembleDebug        # -> app/build/outputs/apk/debug/app-debug.apk
+./gradlew assembleLanDebug           # -> app/build/outputs/apk/lan/debug/app-lan-debug.apk
+./gradlew assembleOfflineDebug       # -> app/build/outputs/apk/offline/debug/app-offline-debug.apk (no network permission)
 
 # 4. Install over USB (enable Developer options + USB debugging on the phone first)
 adb devices                    # accept the "Allow USB debugging" prompt on the phone
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb install -r app/build/outputs/apk/offline/debug/app-offline-debug.apk   # or the lan APK
 ```
 
 Put the three `export` lines in `~/.bashrc` to keep them. Android Studio (Flatpak `com.google.AndroidStudio`)

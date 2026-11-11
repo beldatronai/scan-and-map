@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <!-- Strip INTERNET even if a library manifest (e.g. the ARCore client) tries to merge it in. -->
+    <uses-permission android:name="android.permission.INTERNET" tools:node="remove" />
+</manifest>
