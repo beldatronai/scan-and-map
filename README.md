@@ -35,7 +35,7 @@ commands follow their documented CLIs but have not been run on your RTX box yet.
 **Phone**
 
 1. Download `scanmap-debug-apk` from the latest CI run (Actions tab) or build with
-   `cd android && ./gradlew assembleDebug`, then `adb install app/build/outputs/apk/debug/app-debug.apk`.
+   `cd android && ./gradlew assembleOfflineDebug`, then `adb install app/build/outputs/apk/offline/debug/app-offline-debug.apk` (or the `lan` variant if you want "Send to Fedora").
 2. On the Pixel: Settings → System → Developer options → turn **off "Wi-Fi scan throttling"**.
    Without this Android allows only 4 full Wi-Fi scans per 2 minutes (connected-network RSSI still
    works either way).
